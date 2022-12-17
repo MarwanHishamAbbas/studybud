@@ -9,8 +9,9 @@ class Topic(models.Model):
         return self.name
 
 
-# Create your models here.
+
 class Room(models.Model):
+    # ForeignKey -> Depending on the User class
     host = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     topic = models.ForeignKey(Topic, on_delete=models.SET_NULL, null=True)
     name = models.CharField(max_length=100)
@@ -25,9 +26,12 @@ class Room(models.Model):
     def __str__(self):
         return self.name
 
+    class Meta:
+        ordering = ['-updated', '-created']
 
 # Many to one relationship with room
 class Message(models.Model):
+    # CASCADE -> if User get deleted the Message will be deleted
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     room = models.ForeignKey(Room, on_delete=models.CASCADE)
     body = models.TextField()
