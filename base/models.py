@@ -9,7 +9,6 @@ class Topic(models.Model):
         return self.name
 
 
-
 class Room(models.Model):
     # ForeignKey -> Depending on the User class
     host = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
