@@ -16,7 +16,7 @@ class Room(models.Model):
     name = models.CharField(max_length=100)
     description = models.TextField(null=True, blank=True)
     # this attr can't be blank (in database table)
-    # participents
+    participents = models.ManyToManyField(User, related_name='participents', blank=True)
     updated = models.DateTimeField(auto_now=True)
     created = models.DateTimeField(auto_now_add=True)
     # auto_now -> take a date snapshot everytime this updated

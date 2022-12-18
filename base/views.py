@@ -3,7 +3,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login, logout
 from django.db.models import Q
-from .models import Room, Topic
+from .models import Room, Topic, Message
 from .forms import RoomForm
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
@@ -68,7 +68,18 @@ def room(request, pk):
     room = Room.objects.get(id=pk)
     # query child objects for specific room
     room_messages = room.message_set.all()
-    context = {'room': room, 'room_messages': room_messages}    
+    participents = room.participents.all()
+    room.participents.add(room.host)
+    if request.method == "POST":
+        Message.objects.create(
+            user=request.user,
+            room=room,
+            body=request.POST.get('body')
+        )
+        room.participents.add(request.user)
+        return redirect('room', pk=room.id)
+
+    context = {'room': room, 'room_messages': room_messages, 'participents': participents}    
     return render(request, 'base/room.html', context)
 
 
