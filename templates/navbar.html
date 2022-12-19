@@ -1,15 +1,19 @@
 <a href="/">
   <h1>LOGO</h1>
 </a>
-<h3>Welcome, {{request.user}}</h3>
 
 <form method="GET" action="{% url 'home' %}">
   <input type="text" name="q" placeholder="Search for a room......" />
 </form>
 
 {% if request.user.is_authenticated %}
-<a href="{%url 'logout' %}">Logout</a>
-
+<h3>Welcome, {{request.user}}</h3>
+<p>
+  <a href="{%url 'logout'%}">Logout</a>
+</p>
+<p>
+  <a href="{%url 'user-profile' request.user.id%}">View Profile</a>
+</p>
 {%else%}
 <a href="{%url 'login' %}">Login</a>
 {% endif %}

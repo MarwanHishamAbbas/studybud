@@ -10,7 +10,6 @@ from django.contrib.auth.forms import UserCreationForm
 from django.http import HttpResponse
 
 
-
 def loginPage(request):
     page = 'login'
     if request.user.is_authenticated:
@@ -31,9 +30,11 @@ def loginPage(request):
     context = {'page': page}
     return render(request, 'base/login_register.html', context)
 
+
 def logoutPage(request):
     logout(request)
     return redirect('home')
+
 
 def registerPage(request):
     form = UserCreationForm()
@@ -79,9 +80,17 @@ def room(request, pk):
         )
         room.participents.add(request.user)
         return redirect('room', pk=room.id)
-
     context = {'room': room, 'room_messages': room_messages, 'participents': participents}    
     return render(request, 'base/room.html', context)
+
+
+def userProfile(request, pk):
+    user = User.objects.get(id=pk)
+    rooms = user.room_set.all()
+    room_messages = user.message_set.all()
+    topics = Topic.objects.all()
+    context = {'user': user, 'rooms': rooms, 'topics': topics, 'messages': room_messages}
+    return render(request, 'base/profile.html', context)
 
 
 @login_required(login_url='login')
@@ -133,3 +142,4 @@ def deleteMessage(request, pk):
         return redirect('home')
     context = {'obj': message}
     return render(request, 'base/delete.html', context)
+
