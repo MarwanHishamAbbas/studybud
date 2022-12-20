@@ -4,7 +4,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login, logout
 from django.db.models import Q
 from .models import Room, Topic, Message
-from .forms import RoomForm
+from .forms import RoomForm, UserForm
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
 from django.http import HttpResponse
@@ -14,22 +14,26 @@ def loginPage(request):
     page = 'login'
     if request.user.is_authenticated:
         return redirect('home')
-    if request.method == "POST":
+
+    if request.method == 'POST':
         username = request.POST.get('username').lower()
         password = request.POST.get('password')
-        try: 
+
+        try:
             user = User.objects.get(username=username)
         except:
             messages.error(request, 'User does not exist')
+
         user = authenticate(request, username=username, password=password)
+
         if user is not None:
             login(request, user)
             return redirect('home')
         else:
             messages.error(request, 'Username OR password does not exit')
+
     context = {'page': page}
     return render(request, 'base/login_register.html', context)
-
 
 def logoutPage(request):
     logout(request)
@@ -66,13 +70,12 @@ def home(request):
     return render(request, 'base/home.html', context)
 
 
-def room(request, pk): 
+def room(request, pk):
     room = Room.objects.get(id=pk)
-    # query child objects for specific room
     room_messages = room.message_set.all()
     participents = room.participents.all()
-    room.participents.add(room.host)
-    if request.method == "POST":
+
+    if request.method == 'POST':
         Message.objects.create(
             user=request.user,
             room=room,
@@ -80,8 +83,11 @@ def room(request, pk):
         )
         room.participents.add(request.user)
         return redirect('room', pk=room.id)
-    context = {'room': room, 'room_messages': room_messages, 'participents': participents}    
+
+    context = {'room': room, 'room_messages': room_messages,
+               'participents': participents}
     return render(request, 'base/room.html', context)
+
 
 
 def userProfile(request, pk):
@@ -100,7 +106,6 @@ def createRoom(request):
     if request.method == 'POST':
         topic_name = request.POST.get('topic')
         topic, created = Topic.objects.get_or_create(name=topic_name)
-
         Room.objects.create(
             host=request.user,
             topic=topic,
@@ -158,3 +163,15 @@ def deleteMessage(request, pk):
     context = {'obj': message}
     return render(request, 'base/delete.html', context)
 
+
+@login_required(login_url='login')
+def updateUser(request):
+    user = request.user 
+    form = UserForm(instance=user)
+    if request.method == 'POST':
+        form = UserForm(request.POST, instance=user)
+        if form.is_valid():
+            form.save()
+            return redirect('user-profile', pk=user.id)
+    context = {'form': form}
+    return render(request, 'base/update-user.html', context)
